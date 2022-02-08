@@ -32,7 +32,7 @@ public class App
             try
             {
                 // Wait a bit for db to start
-                Thread.sleep(30000);
+                Thread.sleep(3000);
                 // Connect to database
                 con = DriverManager.getConnection("jdbc:mysql://db:3306/employees?useSSL=false", "root", "example");
                 System.out.println("Successfully connected");
@@ -110,6 +110,36 @@ public class App
             }
             else
                 return null;
+
+            strSelect =
+                    "SELECT departments.dept_name as department \n" +
+                            "FROM dept_emp\n" +
+                            "JOIN departments ON (dept_emp.dept_no = departments.dept_no)\n" +
+                            "WHERE dept_emp.emp_no = " + ID + ";";
+            rset = stmt.executeQuery(strSelect);
+            if (rset.next())
+            {
+                emp.dept_name = rset.getString("department");
+            }
+            else
+                return null;
+
+            strSelect =
+                    "SELECT employees.first_name as first_name, employees.last_name as last_name\n" +
+                            "FROM dept_manager\n" +
+                            "JOIN departments ON (dept_manager.dept_no = departments.dept_no)\n" +
+                            "JOIN employees ON (dept_manager.emp_no = employees.emp_no)\n" +
+                            "WHERE departments.dept_name = '" + emp.dept_name + "'" +
+                            "AND dept_manager.to_date = " + "'9999-01-01'" +
+                            ";";
+            rset = stmt.executeQuery(strSelect);
+            if (rset.next())
+            {
+                emp.manager = rset.getString("first_name") + " " + rset.getString("last_name");
+            }
+            else
+                return null;
+
         }
         catch (Exception e)
         {
