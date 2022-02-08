@@ -71,6 +71,7 @@ public class App
 
     public Employee getEmployee(int ID)
     {
+        Employee emp = new Employee();
         try
         {
             // Create an SQL statement
@@ -79,18 +80,33 @@ public class App
             String strSelect =
                     "SELECT emp_no, first_name, last_name "
                             + "FROM employees "
-                            + "WHERE emp_no = " + ID;
+                            + "WHERE emp_no = " + ID
+                            + ";";
             // Execute SQL statement
             ResultSet rset = stmt.executeQuery(strSelect);
             // Return new employee if valid.
             // Check one is returned
             if (rset.next())
             {
-                Employee emp = new Employee();
                 emp.emp_no = rset.getInt("emp_no");
                 emp.first_name = rset.getString("first_name");
                 emp.last_name = rset.getString("last_name");
-                return emp;
+            }
+            else
+                return null;
+
+            strSelect =
+                    "SELECT titles.title as title, salaries.salary as salary\n" +
+                    "FROM titles\n" +
+                    "JOIN salaries ON (titles.emp_no = salaries.emp_no AND titles.to_date = salaries.to_date)\n" +
+                    "WHERE titles.emp_no = " + ID + "\n" +
+                    "AND titles.to_date = '9999-01-01'\n" +
+                    ";";
+            rset = stmt.executeQuery(strSelect);
+            if (rset.next())
+            {
+                emp.title = rset.getString("title");
+                emp.salary = rset.getInt("salary");
             }
             else
                 return null;
@@ -101,6 +117,8 @@ public class App
             System.out.println("Failed to get employee details");
             return null;
         }
+        return emp;
+
     }
 
     public void displayEmployee(Employee emp) {
