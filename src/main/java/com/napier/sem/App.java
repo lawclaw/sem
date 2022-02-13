@@ -34,7 +34,7 @@ public class App
                 // Wait a bit for db to start
                 Thread.sleep(30000);
                 // Connect to database
-                con = DriverManager.getConnection("jdbc:mysql://db:3306/employees?useSSL=false", "root", "example");
+                con = DriverManager.getConnection("jdbc:mysql://db:3306/world?useSSL=false", "root", "example");
                 System.out.println("Successfully connected");
                 break;
             }
@@ -69,77 +69,32 @@ public class App
         }
     }
 
-    public Employee getEmployee(int ID)
+    public Country getCountry(String name)
     {
-        Employee emp = new Employee();
+        Country country = new Country();
         try
         {
             // Create an SQL statement
             Statement stmt = con.createStatement();
             // Create string for SQL statement
             String strSelect =
-                    "SELECT emp_no, first_name, last_name "
-                            + "FROM employees "
-                            + "WHERE emp_no = " + ID
-                            + ";";
+                    "SELECT code, name, continent, population\n" +
+                            "FROM country\n" +
+                            "WHERE name = " + "'" + name + "'" +
+                            ";";
             // Execute SQL statement
             ResultSet rset = stmt.executeQuery(strSelect);
             // Return new employee if valid.
             // Check one is returned
             if (rset.next())
             {
-                emp.emp_no = rset.getInt("emp_no");
-                emp.first_name = rset.getString("first_name");
-                emp.last_name = rset.getString("last_name");
+                country.code = rset.getString("code");
+                country.name = rset.getString("name");
+                country.continent = rset.getString("continent");
+                country.population = rset.getInt("population");
             }
             else
                 return null;
-
-            strSelect =
-                    "SELECT titles.title as title, salaries.salary as salary\n" +
-                    "FROM titles\n" +
-                    "JOIN salaries ON (titles.emp_no = salaries.emp_no AND titles.to_date = salaries.to_date)\n" +
-                    "WHERE titles.emp_no = " + ID + "\n" +
-                    "AND titles.to_date = '9999-01-01'\n" +
-                    ";";
-            rset = stmt.executeQuery(strSelect);
-            if (rset.next())
-            {
-                emp.title = rset.getString("title");
-                emp.salary = rset.getInt("salary");
-            }
-            else
-                return null;
-
-            strSelect =
-                    "SELECT departments.dept_name as department \n" +
-                            "FROM dept_emp\n" +
-                            "JOIN departments ON (dept_emp.dept_no = departments.dept_no)\n" +
-                            "WHERE dept_emp.emp_no = " + ID + ";";
-            rset = stmt.executeQuery(strSelect);
-            if (rset.next())
-            {
-                emp.dept_name = rset.getString("department");
-            }
-            else
-                return null;
-
-            strSelect =
-                    "SELECT employees.first_name as first_name, employees.last_name as last_name\n" +
-                            "FROM dept_manager\n" +
-                            "JOIN departments ON (dept_manager.dept_no = departments.dept_no)\n" +
-                            "JOIN employees ON (dept_manager.emp_no = employees.emp_no)\n" +
-                            "WHERE departments.dept_name = '" + emp.dept_name + "'" +
-                            "AND dept_manager.to_date = " + "'9999-01-01'" +
-                            ";";
-            rset = stmt.executeQuery(strSelect);
-            if (rset.next())
-            {
-                emp.manager = rset.getString("first_name") + " " + rset.getString("last_name");
-            }
-            else
-                return null;
-
         }
         catch (Exception e)
         {
@@ -147,20 +102,16 @@ public class App
             System.out.println("Failed to get employee details");
             return null;
         }
-        return emp;
+        return country;
 
     }
 
-    public void displayEmployee(Employee emp) {
-        if (emp != null) {
-            System.out.println(
-                    emp.emp_no + " "
-                    + emp.first_name + " "
-                    + emp.last_name + "\n"
-                    + emp.title + "\n"
-                    + "Salary: " + emp.salary + "\n"
-                    + emp.dept_name + "\n"
-                    + "Manager: " + emp.manager + "\n");
+    public void displayCountry(Country country) {
+        if (country != null) {
+            System.out.println(country.code);
+            System.out.println(country.name);
+            System.out.println(country.continent);
+            System.out.println(country.population);
         }
     }
 
@@ -173,10 +124,10 @@ public class App
         a.connect();
 
         // Retrieve employee with employee id: 255530
-        Employee emp = a.getEmployee(255530);
+        Country country = a.getCountry("Aruba");
 
         // Display employee
-        a.displayEmployee(emp);
+        a.displayCountry(country);
 
         // Disconnect from database
         a.disconnect();
